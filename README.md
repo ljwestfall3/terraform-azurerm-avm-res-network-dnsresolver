@@ -25,9 +25,9 @@ This is a module for deploying private dns resolver. It can be used to deploy th
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.5.0)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71.0, < 5.0)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -50,6 +50,7 @@ The following resources are used by this module:
 - [azurerm_role_assignment.rulesets](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/role_assignment) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
+- [terraform_data.outbound](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 - [azurerm_client_config.telemetry](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
@@ -164,6 +165,7 @@ map(object({
       link_with_outbound_endpoint_virtual_network         = optional(bool, true)
       metadata_for_outbound_endpoint_virtual_network_link = optional(map(string), null)
       additional_virtual_network_links = optional(map(object({
+        name     = optional(string)
         vnet_id  = string
         metadata = optional(map(string), null)
       })), {})
@@ -224,13 +226,25 @@ Default: `null`
 
 The following outputs are exported:
 
+### <a name="output_forwarding_rulesets"></a> [forwarding\_rulesets](#output\_forwarding\_rulesets)
+
+Description: The forwarding rulesets of the DNS resolver.
+
 ### <a name="output_inbound_endpoint_ips"></a> [inbound\_endpoint\_ips](#output\_inbound\_endpoint\_ips)
 
 Description: The IP addresses of the inbound endpoints.
 
+### <a name="output_inbound_endpoints"></a> [inbound\_endpoints](#output\_inbound\_endpoints)
+
+Description: The inbound endpoints of the DNS resolver.
+
 ### <a name="output_name"></a> [name](#output\_name)
 
 Description: The name of the DNS resolver.
+
+### <a name="output_outbound_endpoints"></a> [outbound\_endpoints](#output\_outbound\_endpoints)
+
+Description: The outbound endpoints of the DNS resolver.
 
 ### <a name="output_resource"></a> [resource](#output\_resource)
 

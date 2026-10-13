@@ -13,7 +13,7 @@ resource "azurerm_private_dns_resolver_inbound_endpoint" "this" {
   location                = local.location
   name                    = coalesce(each.value.name, "in-${each.key}-dnsResolver-inbound")
   private_dns_resolver_id = azurerm_private_dns_resolver.this.id
-  tags                    = var.tags
+  tags                    = each.value.tags != null ? each.value.merge_with_module_tags ? merge(var.tags, each.value.tags) : each.value.tags : each.value.merge_with_module_tags ? var.tags : {}
 
   ip_configurations {
     subnet_id                    = "${var.virtual_network_resource_id}/subnets/${each.value.subnet_name}"
@@ -29,7 +29,7 @@ resource "azurerm_private_dns_resolver_outbound_endpoint" "this" {
   name                    = coalesce(each.value.name, "out-${each.key}-dnsResolver-outbound")
   private_dns_resolver_id = azurerm_private_dns_resolver.this.id
   subnet_id               = "${var.virtual_network_resource_id}/subnets/${each.value.subnet_name}"
-  tags                    = var.tags
+  tags                    = each.value.tags != null ? each.value.merge_with_module_tags ? merge(var.tags, each.value.tags) : each.value.tags : each.value.merge_with_module_tags ? var.tags : {}
 }
 
 # the "terraform_data" resource is used to trigger replacement of the forwarding rulesets when the outbound endpoint is recreated"
@@ -38,7 +38,8 @@ resource "terraform_data" "outbound" {
   input    = azurerm_private_dns_resolver_outbound_endpoint.this[each.value.outbound_endpoint_name].id
 }
 
-
+# Creating a private DNS resolver DNS forwarding ruleset and forwarding rules for each outbound endpoint.
+# The ruleset is linked to the outbound endpoint it is created under, and can optionally link to an additional outbound endpoint provided in the "additional_outbound_endpoint_link" attribute.
 resource "azurerm_private_dns_resolver_dns_forwarding_ruleset" "this" {
   for_each = tomap({ for ruleset in local.forwarding_rulesets : "${ruleset.outbound_endpoint_name}-${ruleset.name}" => ruleset })
 
@@ -46,7 +47,7 @@ resource "azurerm_private_dns_resolver_dns_forwarding_ruleset" "this" {
   name                                       = each.value.name
   private_dns_resolver_outbound_endpoint_ids = [azurerm_private_dns_resolver_outbound_endpoint.this[each.value.outbound_endpoint_name].id]
   resource_group_name                        = var.resource_group_name
-  tags                                       = var.tags
+  tags                                       = each.value.tags != null ? each.value.merge_with_module_tags ? merge(var.tags, each.value.tags) : each.value.tags : each.value.merge_with_module_tags ? var.tags : {}
 
   lifecycle {
     replace_triggered_by = [terraform_data.outbound[each.key]]
